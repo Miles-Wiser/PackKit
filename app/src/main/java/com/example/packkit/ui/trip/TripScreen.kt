@@ -1,20 +1,23 @@
 package com.example.packkit.ui.trip
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ElevatedButton
-import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
@@ -75,9 +78,14 @@ fun TripScreen(navController: NavController, modifier: Modifier) {
  */
 @Composable
 fun TripCard(trip: TripData?, navController: NavController) {
-    FilledTonalButton (
+    Button (
         modifier = Modifier.padding(10.dp),
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        ),
         onClick = { navController.navigate("trip/${trip?.trip}") }
+
     ) {
         // displays the trip and delete button in a row
         Row(
@@ -87,38 +95,51 @@ fun TripCard(trip: TripData?, navController: NavController) {
             // displays the name and date of the trip in a column
             Column(
                 modifier = Modifier
-                    .weight(3f),
+                    .weight(2f),
                 horizontalAlignment = Alignment.Start,
             ) {
-                Text(trip?.trip ?: "No Trip Available")
                 Text(
-                    trip?.date
+                    text = trip?.trip ?: "No Trip Available",
+                    style = MaterialTheme.typography.titleLarge
+                )
+                Text(
+                    text = trip?.date
                         ?.format(
                             DateTimeFormatter.ofPattern("dd MMM, yyyy")
                         )
-                        ?: "null Date"
+                        ?: "null Date",
+                    style = MaterialTheme.typography.titleMedium
                 )
             }
             // delete trip button
-            ElevatedButton (
-                modifier = Modifier
-                    .weight(1f),
-                onClick = { /* TODO: Add Delete Function */ }
-            ) {
-                // displays icon and description in a column
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth(),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Image(
-                        painter = painterResource(R.drawable.ic_delete),
-                        contentDescription = "Trash",
-                        modifier = Modifier
-                    )
-                    Text("Trash")
-                }
-            }
+//            ElevatedButton (
+//                modifier = Modifier
+//                    .weight(1f),
+//                onClick = { /* TODO: Add Delete Function */
+//                    Trip.sampleTrips.remove(trip)
+//                }
+//            ) {
+//                // displays icon and description in a column
+//                Column(
+//                    modifier = Modifier,
+//                    horizontalAlignment = Alignment.CenterHorizontally
+//                ) {
+//                    Image(
+//                        painter = painterResource(R.drawable.ic_delete),
+//                        contentDescription = "Trash",
+//                        modifier = Modifier,
+//                        colorFilter = if (isSystemInDarkTheme()) {
+//                            ColorFilter.tint(Color.LightGray)
+//                        } else {
+//                            null
+//                        }
+//                    )
+//                    Text(
+//                        text = "Trash",
+//                        style = MaterialTheme.typography.titleSmall
+//                    )
+//                }
+//            }
         }
     }
 }
@@ -131,7 +152,9 @@ fun TripCard(trip: TripData?, navController: NavController) {
 @Composable
 fun TripSection(title: String) {
     Text(
-        title,
+        text = title,
+        color = MaterialTheme.colorScheme.onBackground,
+        style = MaterialTheme.typography.headlineLarge,
         modifier = Modifier.padding(20.dp)
     )
 }

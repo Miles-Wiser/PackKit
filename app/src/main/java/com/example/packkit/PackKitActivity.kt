@@ -6,6 +6,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -14,19 +15,24 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.core.view.WindowCompat
+import androidx.core.view.WindowInsetsCompat
+import androidx.core.view.WindowInsetsControllerCompat
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.packkit.ui.gear.GearInfoScreen
 import com.example.packkit.ui.more.MoreScreen
 import com.example.packkit.ui.theme.PackKitTheme
 import com.example.packkit.ui.trail.TrailInfoScreen
@@ -37,7 +43,17 @@ import com.example.packkit.ui.trip.TripScreen
 class PackKitActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         enableEdgeToEdge()
+
+        // Hide the system bars
+        WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        val controller = WindowCompat.getInsetsController(window, window.decorView)
+        controller.systemBarsBehavior =
+            WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+        controller.hide(WindowInsetsCompat.Type.systemBars())
+
         setContent {
             PackKitApp()
         }
@@ -50,6 +66,8 @@ fun PackKitApp() {
         val navController = rememberNavController()
 
         Scaffold(
+            containerColor = MaterialTheme.colorScheme.background,
+            contentColor = MaterialTheme.colorScheme.onBackground,
             bottomBar = { Footer(navController) }
         ) { paddingValues ->
             NavHost(
@@ -64,7 +82,6 @@ fun PackKitApp() {
                 }
                 composable(route = "more") {
                     MoreScreen(
-                        navController = navController,
                         modifier = Modifier.padding(paddingValues)
                     )
                 }
@@ -77,20 +94,20 @@ fun PackKitApp() {
                         if (tripId == trip.trip) {
                             Column(modifier = Modifier.padding(paddingValues)) {
                                 TrailInfoScreen(
-                                    navController = navController,
+//                                    navController = navController,
                                     trip = trip,
-                                    modifier = Modifier.padding(paddingValues)
+//                                    modifier = Modifier.padding(paddingValues)
                                 )
                             }
                             break
                         }
                     }
                 }
-                composable(route = "gear") {
-                    GearInfoScreen(
-                        modifier = Modifier.padding(paddingValues)
-                    )
-                }
+//                composable(route = "gear") {
+//                    GearInfoScreen(
+//                        modifier = Modifier.padding(paddingValues)
+//                    )
+//                }
             }
         }
     }
@@ -103,15 +120,13 @@ fun PackKitApp() {
 fun Footer(navController: NavController) {
     Row(
         modifier = Modifier
-//            TODO: Figure out how to apply colors correctly
-            .background(Color.DarkGray)
-            .padding(bottom = 20.dp)
-            .height(120.dp)
+            .background(color = MaterialTheme.colorScheme.primary)
+            .padding(vertical = 20.dp)
+            .height(75.dp)
             .fillMaxWidth(),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceEvenly
     ) {
-//        FooterIcon(R.drawable.ic_add, "Add")
         FooterIcon(R.drawable.ic_home, "Home", navController = navController)
         FooterIcon(R.drawable.ic_more, "More", navController = navController)
     }
@@ -126,7 +141,11 @@ fun Footer(navController: NavController) {
 @Composable
 fun FooterIcon(imgId: Int, description: String, navController: NavController) {
     Button(
-        onClick = { navController.navigate(description) }
+        onClick = { navController.navigate(description) },
+        colors = ButtonDefaults.buttonColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer,
+            contentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     ) {
         Column(
             modifier = Modifier
@@ -138,9 +157,18 @@ fun FooterIcon(imgId: Int, description: String, navController: NavController) {
             Image(
                 painter = painterResource(imgId),
                 contentDescription = description,
-                modifier = Modifier
+                modifier = Modifier,
+                colorFilter = if (isSystemInDarkTheme()) {
+                    ColorFilter.tint(Color.LightGray)
+                } else {
+                    null
+                }
             )
-            Text(description)
+            Text(
+                text = description,
+                modifier = Modifier,
+                style = MaterialTheme.typography.titleSmall
+            )
         }
     }
 }

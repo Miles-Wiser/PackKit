@@ -1,29 +1,27 @@
 package com.example.packkit.ui.trail
 
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.RadioButton
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavController
+import com.example.packkit.ui.gear.Gear
+import com.example.packkit.ui.gear.GearItemData
 import java.time.format.DateTimeFormatter
 
 
 @Composable
-fun TrailInfoScreen(navController: NavController, trip: TripData, modifier: Modifier) {
+fun TrailInfoScreen(trip: TripData) {
     val trip = trip
 
-    Column(modifier = modifier) {
+    Column {
         Header(trip)
         Body(trip)
     }
@@ -31,70 +29,110 @@ fun TrailInfoScreen(navController: NavController, trip: TripData, modifier: Modi
 
 @Composable
 fun Header(trip: TripData) {
-    Column(modifier = Modifier.padding(20.dp)) {
+    Column(modifier = Modifier
+        .background(color = MaterialTheme.colorScheme.primaryContainer)
+        .padding(20.dp)
+    ) {
         Text(
-            "Trail Info: ${trip.trip}",
+            text = "Trail Info: ${trip.trip}",
             modifier = Modifier
-
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
         )
-        Text(trip.date.format(DateTimeFormatter.ofPattern("dd MMM, yyyy")))
+        Text(
+            text = trip.date
+                .format(DateTimeFormatter.ofPattern("MMMM dd , yyyy")),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     }
 }
 
 @Composable
 fun Body(trip: TripData) {
-    // TODO: Can use function to replace these
-    // Distance and Elevation Gain
-    Row(modifier = Modifier) {
-        Text(
-            "Distance ${trip.distance}mi",
-            modifier = Modifier.weight(1f)
-        )
-        Text(
-            "Elevation Gain: ${trip.eleGain}ft",
-            modifier = Modifier.weight(1f)
-        )
-    }
-
-    // Permits Required
-    // TODO: Set state for selected
-    Row(
-        verticalAlignment = Alignment.CenterVertically
+    val titleList = listOf("Distance", "Elevation Gain", "Reports", "Notes", "Gear")
+    val scrollState = rememberLazyListState()
+    LazyColumn(
+        state = scrollState,
+        modifier = Modifier
     ) {
-        Text("Permits")
-        RadioButton(
-            selected = false,
-            // TODO("Change state of selected")
-            onClick = { }
-        )
+        items(titleList) { title ->
+            BodyCard(title, trip)
+        }
     }
-    var isExReport by remember { mutableStateOf(false) }
+}
 
-    // Reports
-    Column {
-        Text("Reports")
+@Composable
+fun BodyCard(title: String, trip: TripData) {
+    Column(
+        modifier = Modifier
+            .padding(20.dp)
+    ) {
         Text(
-            trip.report,
-            modifier = Modifier
-                .clickable(
-                    onClick = { isExReport = !isExReport }
-                ),
-            maxLines = if (isExReport) Int.MAX_VALUE else 1
+            text = title,
+            style = MaterialTheme.typography.titleLarge
         )
-    }
 
-    // User Notes
-    var isExNotes by remember { mutableStateOf(false)}
-    Column {
-        Text("Notes")
+
+        val tripData = Gear.sampleTripData
+        var gearWeight = 0.0
+
         Text(
-            trip.notes,
-            modifier = Modifier
-                .clickable(
-                    onClick = { isExNotes = !isExNotes }
-                ),
-            maxLines = if (isExNotes) Int.MAX_VALUE else 1
+            text = when (title) {
+                "Distance" -> "${trip.distance}mi"
+                "Elevation Gain" -> "${trip.eleGain}ft"
+                "Reports" -> trip.report
+                "Notes" -> trip.notes
+                "Gear" -> {
+                    for (index in tripData) {
+                        if (index.trip.trip == trip.trip) {
+                            val tripGear = index.items
+                            for (items in tripGear) {
+                                GearCard(index = items)
+                                gearWeight += items.weight
+                            }
+                        }
+                    }
+                    "Total Weight: %.2f lbs".format(gearWeight)
+                }
+                else -> "No Value Found"
+            },
+            modifier = Modifier.padding(horizontal = 10.dp),
+            style = MaterialTheme.typography.bodyLarge
         )
     }
+}
+
+@Composable
+fun GearCard(index: GearItemData) {
+    // Item Name
+    Text(
+        text = index.item,
+        modifier = Modifier
+            .padding(top = 10.dp, start = 10.dp, end = 10.dp),
+        style = MaterialTheme.typography.titleMedium
+    )
+
+    // Item Weight
+    Text(
+        text = "%.2f lbs".format(index.weight),
+        modifier = Modifier
+            .padding(start = 20.dp, end = 10.dp),
+        )
+
+//    Row(
+//        modifier = Modifier
+//            .padding(bottom = 10.dp, start = 20.dp, end = 10.dp),
+//        verticalAlignment = Alignment.CenterVertically
+//    ) {
+//        // Item Carried Button
+//        Text("Carried")
+//        RadioButton(index.isCarry, onClick = { })
+//
+//        // Item Consumable Button
+//        Text("Consumable")
+//        RadioButton(index.isConsume, onClick = { })
+//    }
+
 }

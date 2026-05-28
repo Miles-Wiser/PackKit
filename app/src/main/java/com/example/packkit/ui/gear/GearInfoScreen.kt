@@ -2,6 +2,7 @@ package com.example.packkit.ui.gear
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,6 +12,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.ElevatedButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.packkit.R
 import com.example.packkit.ui.trail.TripData
@@ -41,13 +44,23 @@ fun GearInfoScreen(modifier: Modifier) {
 
 @Composable
 fun Header(trip: TripData) {
-    Column(modifier = Modifier) {
+    Column(modifier = Modifier
+        .background(color = MaterialTheme.colorScheme.primaryContainer)
+        .padding(20.dp)
+    ) {
         Text(
             "Gear for \"${trip.trip}\" Trip",
             modifier = Modifier
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
         )
-        Text(trip.date.format(DateTimeFormatter.ofPattern("dd MMM, yyyy")))
+        Text(
+            text = trip.date
+                .format(DateTimeFormatter.ofPattern("MMMM dd , yyyy")),
+            style = MaterialTheme.typography.titleLarge,
+            color = MaterialTheme.colorScheme.onPrimaryContainer
+        )
     }
 }
 
@@ -139,15 +152,14 @@ fun GearSection(title: String) {
 fun GearCard(index: GearItemData) {
     Row {
         // Delete Button
-        DeleteGear(
-            item = index,
-            modifier = Modifier.weight(1f)
-        )
+//        DeleteGear(
+//            item = index,
+//            modifier = Modifier.weight(1f).padding(10.dp)
+//        )
 
         // Item info
         LazyRow(
-            modifier = Modifier.weight(3f),
-            verticalAlignment = Alignment.Bottom
+            modifier = Modifier.weight(2f).padding(10.dp)
         ) {
             // Item Name
             item {
@@ -178,7 +190,7 @@ fun GearCard(index: GearItemData) {
 fun DeleteGear(item: GearItemData, modifier: Modifier) {
     // delete trip button
     ElevatedButton (
-        modifier = modifier,
+        modifier = modifier.padding(5.dp),
         onClick = { /* TODO: Add Delete Function */ println("Click Me $item") }
     ) {
         // displays icon and description in a column
@@ -192,7 +204,10 @@ fun DeleteGear(item: GearItemData, modifier: Modifier) {
                 contentDescription = "Trash",
                 modifier = Modifier
             )
-            Text("Trash")
+            Text(
+                text = "Trash",
+                style = MaterialTheme.typography.titleSmall
+                )
         }
     }
 }
